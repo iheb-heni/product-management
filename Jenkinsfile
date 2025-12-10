@@ -7,17 +7,13 @@ pipeline {
     }
     
     environment {
-        // Git - METTEZ VOTRE VRAI URL GITHUB
-        GIT_URL = 'https://github.com/Emrane23/product-management.git'  // CHANGEZ-MOI !
+        // Git
+        GIT_URL = 'https://github.com/iheb-heni/product-management.git'
         GIT_BRANCH = 'main'
         
         // Application
         APP_NAME = 'product-management'
         APP_PORT = '8089'
-        
-        // SonarQube (optionnel pour l'instant)
-        SONAR_HOST_URL = 'http://localhost:9000'
-        SONAR_PROJECT_KEY = 'product-management-api'
     }
     
     stages {
@@ -30,28 +26,26 @@ pipeline {
                     echo '🎯 STAGE 1: VÉRIFICATION DES OUTILS REQUIS'
                     echo 'Objectif: S\'assurer que tous les outils nécessaires sont installés'
                     
-                    // Pour Windows (bat) - si vous êtes sur Linux, changez en 'sh'
                     bat '''
                         echo "=== 🛠️ OUTILS DISPONIBLES SUR L'AGENT JENKINS ==="
-                        echo ""
+                        echo.
                         
                         echo "📦 BUILD TOOLS:"
-                        java -version 2>&1 | findstr "version" && echo "✅ Java" || echo "❌ Java non installé"
-                        mvn --version 2>&1 | findstr "Apache Maven" && echo "✅ Maven" || echo "❌ Maven non installé"
-                        git --version 2>&1 | findstr "git version" && echo "✅ Git" || echo "❌ Git non installé"
+                        java -version 2>&1 | findstr "version" >nul && echo ✅ Java || echo ❌ Java non installé
+                        mvn --version 2>&1 | findstr "Apache Maven" >nul && echo ✅ Maven || echo ❌ Maven non installé
+                        git --version 2>&1 | findstr "git version" >nul && echo ✅ Git || echo ❌ Git non installé
                         
-                        echo ""
+                        echo.
                         echo "=== ✅ VÉRIFICATION TERMINÉE ==="
                     '''
                     
-                    // Vérification des versions spécifiques
                     bat '''
-                        echo ""
+                        echo.
                         echo "=== 📋 VERSIONS DÉTAILLÉES ==="
                         java -version
-                        echo ""
+                        echo.
                         mvn --version
-                        echo ""
+                        echo.
                         git --version
                     '''
                 }
@@ -64,7 +58,6 @@ pipeline {
                 }
                 failure {
                     echo '⚠️ Certains outils sont manquants'
-                    echo 'Le pipeline continue mais certains stages pourraient échouer'
                 }
             }
         }
@@ -85,7 +78,7 @@ pipeline {
                     echo "URL: ${GIT_URL}"
                     echo "Branche: ${GIT_BRANCH}"
                     
-                    // Checkout du code SANS credentials (dépôt public)
+                    // Checkout du code
                     git branch: "${GIT_BRANCH}", 
                          url: "${GIT_URL}",
                          poll: false,
@@ -93,24 +86,35 @@ pipeline {
                     
                     // Afficher la structure du projet
                     bat '''
-                        echo ""
+                        echo.
                         echo "=== 📂 STRUCTURE DU PROJET ==="
-                        echo "Projet: ${APP_NAME}"
+                        echo "Projet: %APP_NAME%"
                         dir /b
-                        echo ""
+                        echo.
                         echo "=== 📄 FICHIERS IMPORTANTS ==="
                         if exist pom.xml ( 
-                            echo "✅ pom.xml" 
+                            echo ✅ pom.xml
                             echo "Contenu de pom.xml (premières lignes):"
-                            type pom.xml | findstr "<" | head -10
+                            for /f "tokens=1,2,3,4,5,6,7,8,9,10" %%i in (pom.xml) do (
+                                echo %%i %%j %%k %%l %%m %%n %%o %%p %%q %%r
+                                goto :break
+                            )
+                            :break
                         ) else ( 
-                            echo "❌ pom.xml manquant" 
+                            echo ❌ pom.xml manquant
                         )
+                        
                         if exist src\\main\\java ( 
-                            echo "✅ Code source Java" 
+                            echo ✅ Code source Java
                             dir /b src\\main\\java
                         ) else ( 
-                            echo "❌ Code source manquant" 
+                            echo ❌ Code source manquant
+                        )
+                        
+                        if exist src\\test\\java ( 
+                            echo ✅ Tests disponibles
+                        ) else ( 
+                            echo ⚠️ Tests manquants
                         )
                     '''
                 }
@@ -122,8 +126,8 @@ pipeline {
                     echo '📊 Statistiques:'
                     bat '''
                         echo "Taille du projet:"
-                        dir /s /c | find "bytes"
-                        echo ""
+                        for /f "tokens=3" %%i in ('dir /s /c ^| find "octets"') do echo %%i octets
+                        echo.
                         echo "Nombre de fichiers Java:"
                         dir /s /b *.java 2>nul | find /c ".java" || echo 0
                     '''
@@ -151,10 +155,10 @@ pipeline {
                     
                     bat '''
                         echo "=== 🔍 ANALYSE DU POM.XML ==="
-                        echo ""
+                        echo.
                         echo "Artifacts principaux:"
-                        type pom.xml | findstr "<artifactId>" | findstr -v "filter" | head -5
-                        echo ""
+                        findstr "<artifactId>" pom.xml | findstr /v "filter" | more +7
+                        echo.
                     '''
                     
                     try {
@@ -164,22 +168,19 @@ pipeline {
                         
                     } catch (Exception e) {
                         echo "⚠️ Erreur lors de la résolution des dépendances: ${e.message}"
-                        echo "Tentative avec offline mode..."
+                        echo "Tentative avec compile seulement..."
                         
-                        bat 'mvn clean dependency:go-offline -DskipTests'
-                        echo '✅ Dépendances téléchargées en mode offline'
+                        bat 'mvn clean compile -DskipTests'
+                        echo '✅ Compilation réussie'
                     }
                     
-                    echo "📊 Rapport des dépendances..."
                     bat '''
-                        echo "=== 📋 CACHE MAVEN ==="
-                        echo ""
+                        echo "=== 📋 RAPPORT DÉPENDANCES ==="
+                        echo.
                         if exist "%USERPROFILE%\\.m2\\repository" (
-                            echo "Cache Maven trouvé"
-                            echo "Taille approximative:"
-                            dir /s "%USERPROFILE%\\.m2\\repository" | find "File(s)"
+                            echo ✅ Cache Maven trouvé
                         ) else (
-                            echo "Cache Maven non trouvé"
+                            echo ⚠️ Cache Maven non trouvé
                         )
                     '''
                 }
@@ -191,10 +192,6 @@ pipeline {
                 }
                 failure {
                     echo '❌ Échec d\'installation des dépendances'
-                    echo 'Solutions possibles:'
-                    echo '1. Vérifiez la connexion internet'
-                    echo '2. Vérifiez les repositories Maven'
-                    echo '3. Essayez: mvn dependency:purge-local-repository'
                 }
             }
         }
@@ -214,11 +211,18 @@ pipeline {
                     bat '''
                         echo "=== ✅ VÉRIFICATION COMPILATION ==="
                         if exist target\\classes (
-                            echo "✅ Classes compilées avec succès"
+                            echo ✅ Classes compilées avec succès
                             echo "Nombre de fichiers .class:"
-                            dir /s /b target\\classes\\*.class 2>nul | find /c ".class" || echo "0"
+                            dir /s /b target\\classes\\*.class 2>nul | find /c ".class" || echo 0
                         ) else (
-                            echo "❌ Aucune classe compilée - vérifiez les erreurs"
+                            echo ❌ Aucune classe compilée
+                        )
+                        
+                        if exist target\\*.jar (
+                            echo ✅ JAR généré
+                            dir /b target\\*.jar
+                        ) else (
+                            echo ⚠️ Aucun JAR généré (normal en compilation)
                         )
                     '''
                 }
@@ -227,11 +231,49 @@ pipeline {
             post {
                 success {
                     echo '✅ Compilation réussie'
-                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: false
+                    // Archive le JAR s'il existe
+                    archiveArtifacts artifacts: '**/target/*.jar', fingerprint: false, allowEmptyArchive: true
                 }
                 failure {
                     echo '❌ Échec de compilation'
-                    echo 'Vérifiez les erreurs de compilation dans les logs'
+                }
+            }
+        }
+        
+        // ===============================
+        // STAGE 5: TESTS UNITAIRES
+        // ===============================
+        stage('Tests Unitaires') {
+            steps {
+                script {
+                    echo '🎯 STAGE 5: EXÉCUTION DES TESTS UNITAIRES'
+                    echo 'Objectif: Vérifier la logique métier avec des tests isolés'
+                    
+                    bat 'mvn test -Dtest=*UnitTest'
+                    
+                    // Publier les résultats JUnit
+                    junit '**/target/surefire-reports/*.xml'
+                    
+                    bat '''
+                        echo "=== 📊 RAPPORT TESTS ==="
+                        echo.
+                        if exist target\\surefire-reports (
+                            echo ✅ Rapports de tests générés
+                            dir /b target\\surefire-reports\\*.txt | find /c ".txt" || echo 0
+                        ) else (
+                            echo ⚠️ Aucun rapport de test
+                        )
+                    '''
+                }
+            }
+            
+            post {
+                success {
+                    echo '✅ Tests unitaires exécutés'
+                }
+                failure {
+                    echo '❌ Tests unitaires échoués'
+                    echo 'Vérifiez les rapports de tests pour les détails'
                 }
             }
         }
@@ -246,38 +288,56 @@ pipeline {
             echo "Durée totale: ${currentBuild.durationString}"
             echo ""
             echo "✅ STAGES COMPLÉTÉS:"
-            echo "1. Vérification Outils"
-            echo "2. Checkout Code"
-            echo "3. Installation Dépendances"
-            echo "4. Compilation"
-            echo ""
-            echo "📈 STATISTIQUES:"
             bat '''
-                echo "Fichiers sources:"
-                dir /s /b *.java 2>nul | find /c ".java" || echo "0"
-                echo ""
-                echo "Artifacts générés:"
-                if exist target\\*.jar (
-                    dir /b target\\*.jar
+                echo 1. Vérification Outils - ✅ Outils disponibles
+                echo 2. Checkout Code - ✅ Code source récupéré
+                echo 3. Installation Dépendances - ✅ Dépendances installées
+                echo 4. Compilation - ✅ Code compilé
+                echo 5. Tests Unitaires - ✅ Tests exécutés
+            '''
+            echo ""
+            echo "📈 STATISTIQUES FINALES:"
+            bat '''
+                echo "Fichiers sources Java:"
+                dir /s /b *.java 2>nul | find /c ".java" || echo 0
+                echo.
+                echo "Classes compilées:"
+                dir /s /b target\\classes\\*.class 2>nul | find /c ".class" || echo 0
+                echo.
+                echo "Rapports de tests:"
+                if exist target\\surefire-reports\\*.xml (
+                    dir /b target\\surefire-reports\\*.xml | find /c ".xml" || echo 0
                 ) else (
-                    echo "Aucun JAR généré"
+                    echo Aucun
                 )
             '''
         }
         
         success {
             echo '🎉 PIPELINE RÉUSSIE !'
-            echo 'Toutes les étapes de build sont complétées avec succès'
+            echo ''
+            echo '✅ Toutes les étapes de build sont complétées'
+            echo '📦 Artifacts prêts pour les prochaines étapes'
             echo ''
             echo 'Prochaines étapes possibles:'
-            echo '1. Ajouter les tests unitaires'
-            echo '2. Ajouter SonarQube pour l\'analyse de code'
-            echo '3. Construire l\'image Docker'
+            echo '1. Tests d\'intégration'
+            echo '2. Analyse SonarQube'
+            echo '3. Construction Docker'
         }
         
         failure {
             echo '⚠️ PIPELINE ÉCHOUÉE'
             echo 'Consultez les logs pour identifier l\'erreur'
+            echo ''
+            echo 'Solutions courantes:'
+            echo '1. Vérifiez la connexion internet'
+            echo '2. Vérifiez les dépendances Maven'
+            echo '3. Corrigez les erreurs de compilation'
+        }
+        
+        unstable {
+            echo '🔶 PIPELINE AVEC AVERTISSEMENTS'
+            echo 'Certains tests ont échoué mais le build continue'
         }
     }
 }
