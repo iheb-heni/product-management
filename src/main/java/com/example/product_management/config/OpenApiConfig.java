@@ -1,5 +1,7 @@
 package com.example.productmanagement.config;
 
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +15,12 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Product Management API")
+                        .version("1.0.0")
                         .description("API documentation for product management system")
-                        .version("1.0.0"));
+                        .contact(new Contact()
+                                .name("Support")
+                                .email("support@example.com"))
+                        .license(new License()
+                                .name("Apache 2.0")));
     }
 }
-

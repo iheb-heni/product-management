@@ -18,14 +18,14 @@ import java.util.Map;
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiResponse<?>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+    public ResponseEntity<ApiResponse<String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         log.error("Resource not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiResponse.error(ex.getMessage()));
     }
     
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ApiResponse<?>> handleValidationException(ValidationException ex) {
+    public ResponseEntity<ApiResponse<String>> handleValidationException(ValidationException ex) {
         log.error("Validation error: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ApiResponse.error(ex.getMessage()));
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<?>> handleConstraintViolationException(
+    public ResponseEntity<ApiResponse<String>> handleConstraintViolationException(
             ConstraintViolationException ex) {
         log.error("Constraint violation: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     }
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<?>> handleGeneralException(Exception ex) {
+    public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception ex) {
         log.error("Internal server error: ", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Internal server error. Please try again later."));
