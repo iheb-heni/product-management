@@ -1,6 +1,6 @@
-package com.example.productmanagement.exception;
+package com.example.product_management.exception;
 
-import com.example.productmanagement.dto.ApiResponse;
+import com.example.product_management.dto.ApiResponse;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

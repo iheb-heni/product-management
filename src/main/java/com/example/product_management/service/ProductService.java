@@ -1,11 +1,11 @@
-package com.example.productmanagement.service;
+package com.example.product_management.service;
 
-import com.example.productmanagement.dto.ProductRequest;
-import com.example.productmanagement.dto.ProductResponse;
-import com.example.productmanagement.exception.ResourceNotFoundException;
-import com.example.productmanagement.exception.ValidationException;
-import com.example.productmanagement.model.Product;
-import com.example.productmanagement.repository.ProductRepository;
+import com.example.product_management.dto.ProductRequest;
+import com.example.product_management.dto.ProductResponse;
+import com.example.product_management.exception.ResourceNotFoundException;
+import com.example.product_management.exception.ValidationException;
+import com.example.product_management.model.Product;
+import com.example.product_management.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;

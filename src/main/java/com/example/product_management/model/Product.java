@@ -1,4 +1,4 @@
-package com.example.productmanagement.model;
+package com.example.product_management.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;

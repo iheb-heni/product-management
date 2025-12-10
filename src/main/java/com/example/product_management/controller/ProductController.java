@@ -1,9 +1,9 @@
-package com.example.productmanagement.controller;
+package com.example.product_management.controller;
 
-import com.example.productmanagement.dto.ApiResponse;
-import com.example.productmanagement.dto.ProductRequest;
-import com.example.productmanagement.dto.ProductResponse;
-import com.example.productmanagement.service.ProductService;
+import com.example.product_management.dto.ApiResponse;
+import com.example.product_management.dto.ProductRequest;
+import com.example.product_management.dto.ProductResponse;
+import com.example.product_management.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

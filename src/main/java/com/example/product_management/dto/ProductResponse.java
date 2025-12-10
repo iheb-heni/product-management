@@ -1,4 +1,4 @@
-package com.example.productmanagement.dto;
+package com.example.product_management.dto;
 
 import lombok.*;
 import java.math.BigDecimal;

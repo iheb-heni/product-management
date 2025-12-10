@@ -1,4 +1,4 @@
-package com.example.productmanagement.config;
+package com.example.product_management.config;
 
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.License;

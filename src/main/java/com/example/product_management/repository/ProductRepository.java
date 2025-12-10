@@ -1,6 +1,6 @@
-package com.example.productmanagement.repository;
+package com.example.product_management.repository;
 
-import com.example.productmanagement.model.Product;
+import com.example.product_management.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
