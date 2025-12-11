@@ -14,18 +14,33 @@
 
     <groupId>com.example</groupId>
     <artifactId>product-management</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+
+    <!-- Version dynamique pour Release / Snapshot -->
+    <version>${project.version}</version>
 
     <name>product-management</name>
     <description>Product Management API with best practices</description>
 
-    <!-- 🔥 Toutes les propriétés dans un seul bloc -->
+    <!-- ===================================================== -->
+    <!-- 🔥 PROPRIÉTÉS GLOBALES -->
+    <!-- ===================================================== -->
     <properties>
         <java.version>21</java.version>
         <modelmapper.version>3.2.0</modelmapper.version>
         <rest-assured.version>5.5.0</rest-assured.version>
         <springdoc.version>2.6.0</springdoc.version>
         <jacoco.version>0.8.12</jacoco.version>
+
+        <!-- Version dynamique -->
+        <revision>0.0.1</revision>
+        <sha1/>
+        <changelist>-SNAPSHOT</changelist>
+        <project.version>${revision}${changelist}</project.version>
+
+        <!-- Nexus -->
+        <nexus.url>http://localhost:8081</nexus.url>
+        <nexus.snapshots.url>${nexus.url}/repository/maven-snapshots/</nexus.snapshots.url>
+        <nexus.releases.url>${nexus.url}/repository/maven-releases/</nexus.releases.url>
 
         <!-- Sonar -->
         <sonar.host.url>http://localhost:9000</sonar.host.url>
@@ -35,7 +50,26 @@
         <sonar.java.source>21</sonar.java.source>
     </properties>
 
+    <!-- ===================================================== -->
+    <!-- 🔥 DEPLOY SUR NEXUS -->
+    <!-- ===================================================== -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>${nexus.snapshots.url}</url>
+        </snapshotRepository>
+
+        <repository>
+            <id>nexus-releases</id>
+            <url>${nexus.releases.url}</url>
+        </repository>
+    </distributionManagement>
+
+    <!-- ===================================================== -->
+    <!-- 🔥 DÉPENDANCES -->
+    <!-- ===================================================== -->
     <dependencies>
+
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -115,6 +149,9 @@
 
     </dependencies>
 
+    <!-- ===================================================== -->
+    <!-- 🔥 BUILD + PLUGINS -->
+    <!-- ===================================================== -->
     <build>
         <plugins>
 
@@ -124,43 +161,40 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
+            <!-- Déploiement Nexus -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+
+            <!-- Release Management -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                </configuration>
+            </plugin>
+
             <!-- Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
             </plugin>
 
-            <!-- JaCoCo (🔥 version unique, propre) -->
+            <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
-                <executions>
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
-            <!-- Sonar Scanner -->
+            <!-- Sonar -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
@@ -169,5 +203,31 @@
 
         </plugins>
     </build>
+
+    <!-- ===================================================== -->
+    <!-- 🔥 PROFILE RELEASE -->
+    <!-- ===================================================== -->
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.3.1</version>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.8.0</version>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
