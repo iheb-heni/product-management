@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,15 +9,14 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.5</version>
-        <relativePath/>
+        <relativePath />
     </parent>
 
     <groupId>com.example</groupId>
     <artifactId>product-management</artifactId>
 
     <!-- Version dynamique pour Release / Snapshot -->
-    <version>${project.version}</version>
-
+    <version>1.0.0-SNAPSHOT</version>
     <name>product-management</name>
     <description>Product Management API with best practices</description>
 
@@ -33,7 +32,7 @@
 
         <!-- Version dynamique -->
         <revision>0.0.1</revision>
-        <sha1/>
+        <sha1 />
         <changelist>-SNAPSHOT</changelist>
         <project.version>${revision}${changelist}</project.version>
 
