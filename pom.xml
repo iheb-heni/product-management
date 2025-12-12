@@ -14,9 +14,8 @@
 
     <groupId>com.example</groupId>
     <artifactId>product-management</artifactId>
-
-    <!-- Version dynamique pour Release / Snapshot -->
     <version>1.0.0-SNAPSHOT</version>
+    
     <name>product-management</name>
     <description>Product Management API with best practices</description>
 
@@ -30,16 +29,10 @@
         <springdoc.version>2.6.0</springdoc.version>
         <jacoco.version>0.8.12</jacoco.version>
 
-        <!-- Version dynamique -->
-        <revision>0.0.1</revision>
-        <sha1 />
-        <changelist>-SNAPSHOT</changelist>
-        <project.version>${revision}${changelist}</project.version>
-
         <!-- Nexus -->
         <nexus.url>http://localhost:8081</nexus.url>
-        <nexus.snapshots.url>${nexus.url}/repository/maven-snapshots/</nexus.snapshots.url>
-        <nexus.releases.url>${nexus.url}/repository/maven-releases/</nexus.releases.url>
+        <nexus.snapshots.url>${nexus.url}/repository/maven-snapshots</nexus.snapshots.url>
+        <nexus.releases.url>${nexus.url}/repository/maven-releases</nexus.releases.url>
 
         <!-- Sonar -->
         <sonar.host.url>http://localhost:9000</sonar.host.url>
@@ -68,7 +61,6 @@
     <!-- 🔥 DÉPENDANCES -->
     <!-- ===================================================== -->
     <dependencies>
-
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -145,7 +137,6 @@
             <version>1.19.3</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <!-- ===================================================== -->
@@ -153,37 +144,18 @@
     <!-- ===================================================== -->
     <build>
         <plugins>
-
             <!-- Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-
-            <!-- Déploiement Nexus -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version>
-            </plugin>
-
-            <!-- Release Management -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.1</version>
                 <configuration>
-                    <tagNameFormat>v@{project.version}</tagNameFormat>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <releaseProfiles>release</releaseProfiles>
-                    <goals>deploy</goals>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
                 </configuration>
-            </plugin>
-
-            <!-- Compiler -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
 
             <!-- JaCoCo -->
@@ -191,6 +163,20 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Sonar -->
@@ -199,34 +185,6 @@
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>3.11.0.3922</version>
             </plugin>
-
         </plugins>
     </build>
-
-    <!-- ===================================================== -->
-    <!-- 🔥 PROFILE RELEASE -->
-    <!-- ===================================================== -->
-    <profiles>
-        <profile>
-            <id>release</id>
-            <build>
-                <plugins>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.3.1</version>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.8.0</version>
-                    </plugin>
-
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
 </project>
